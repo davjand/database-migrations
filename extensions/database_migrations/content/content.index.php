@@ -1,0 +1,54 @@
+<?php
+
+	require_once(EXTENSIONS . "/database_migrations/lib/utils.class.php");
+
+	class contentExtensionDatabase_migrationsIndex extends AdministrationPage {
+
+		public function build()
+		{
+			parent::build();
+			$this->setPageType('form');
+			$this->setTitle('');
+			
+		}
+
+		public function about() {
+		
+		}
+
+		public function view()
+		{
+			$this->__indexPage();
+		}
+		
+		private function __indexPage() {
+			
+			if($_GET["action"] == "do") {
+		
+				$fileList = Database_Migrations_Utils::getDatabaseUpdateList();
+				
+				Symphony::Database()->query(file_get_contents(self::$SAVE_PATH . "baseline.sql"));
+				
+				for($i=0;$i<count($fileList);$i++) {
+					Symphony::Database()->query(file_get_contents($fileList[$i]));
+				}				
+				
+				header("Location: " . SYMPHONY_URL . $_GET["redirect"]);
+			
+			}
+			elseif($_GET["action"] == "baseline") {
+				Database_Migrations_Utils::createBaseline(array("sym_authors", "sym_cache", "sym_database_migrations", "sym_extensions", "sym_extensions_delegates", "sym_sessions"));
+			}
+			else {
+				$xslt = new XSLTPage();
+				$xslt->setXSL(EXTENSIONS . '/database_migrations/content/index.xsl', true);
+				$this->Form->setValue($xslt->generate());				
+				
+			}		
+		
+		}
+
+
+	}
+
+?>
