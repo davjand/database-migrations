@@ -85,20 +85,21 @@
 		}
 		
 		public function processQuery($context) {
-			$query = $context["query"];
-			
-			if($this->isChangeQuery($query)) {
-				if($this->isStructureChangeQuery($query)) {
-					$this->saveQuery($query);
-				}
-				else {
-					if(Symphony::Configuration()->get("track-structure-only", "database-migrations") == "no") {
+			if(Database_Migrations_Utils::$CAPTURE_ACTIVE) {
+				$query = $context["query"];
+				
+				if($this->isChangeQuery($query)) {
+					if($this->isStructureChangeQuery($query)) {
 						$this->saveQuery($query);
-					}				
+					}
+					else {
+						if(Symphony::Configuration()->get("track-structure-only", "database-migrations") == "no") {
+							$this->saveQuery($query);
+						}				
+					}
 				}
+				else {/* probably a select query */}
 			}
-			else {/* probably a select query */}
-			
 		}
 		
 		public function appendAlert($context) {

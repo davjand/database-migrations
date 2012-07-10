@@ -1,7 +1,8 @@
 <?php
 
 	require_once(EXTENSIONS . "/database_migrations/lib/utils.class.php");
-
+	require_once(EXTENSIONS . "/database_migrations/lib/fixtures.class.php");
+	
 	class contentExtensionDatabase_migrationsIndex extends AdministrationPage {
 
 		public function build()
@@ -38,6 +39,9 @@
 			}
 			elseif($_GET["action"] == "baseline") {
 				Database_Migrations_Utils::createBaseline(array("sym_authors", "sym_cache", "sym_database_migrations", "sym_extensions", "sym_extensions_delegates", "sym_sessions"));
+			}
+			elseif($_GET["action"] == "test") {
+				Database_Migrations_Fixtures::truncateSection("TestNewSection");
 			}
 			else {
 				$xslt = new XSLTPage();

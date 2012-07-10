@@ -7,6 +7,9 @@
 
 	Class Database_Migrations_Utils {
 		
+		// a switch so that if we're doing operations ourselves (like in the testing functions), we can turn ourselves off.
+		public static $CAPTURE_ACTIVE = 1;
+		
 		public static $SAVE_PATH = "./workspace/migrations/";
 		public static $FILE_PREFIX = "db-";
 
@@ -76,40 +79,50 @@
 			//cycle through
 			foreach($tables as $table) {
 				if(!in_array($table, $ignoreTables)) {
-					$rowResults = Symphony::Database()->fetch("SELECT * FROM ".$table);
-					$numFields = count($rowResults[0]);
-					$return.= 'DROP TABLE '.$table.';';
-					
-					$createRow = Symphony::Database()->fetch('SHOW CREATE TABLE '.$table);
-				
-					$return.= "\n\n". $createRow[0]["Create Table"] .";\n\n";
-
-					for ($i = 0; $i < count($rowResults); $i++)  {
-						
-						$rowInsertDef = "INSERT INTO {$table} (";
-						$rowInsertVal = ") VALUES (";
-						$rowInsertEnd = ");";
-						
-						foreach($rowResults[$i] as $k => $v) {
-						
-							$rowInsertDef .= $k . ",";
-							$rowInsertVal .= "'" . $v . "',";
-							
-						}
-						
-						$rowInsertDef = substr($rowInsertDef,0,-1);
-						$rowInsertVal = substr($rowInsertVal,0,-1);
-						
-						$return .= $rowInsertDef . $rowInsertVal . $rowInsertEnd . "\r\n";
-
-					}
-					$return.="\n\n\n";
+					$return .= getTableBackup($table);
 				}
 			}
 
 			file_put_contents(self::$SAVE_PATH . "/baseline.sql", $return);
 			
 		}	
+		
+		public static function getTableBackup($table) {
+		
+			$return = "";
+		
+			$rowResults = Symphony::Database()->fetch("SELECT * FROM ".$table);
+			$numFields = count($rowResults[0]);
+			$return.= 'DROP TABLE '.$table.';';
+			
+			$createRow = Symphony::Database()->fetch('SHOW CREATE TABLE '.$table);
+		
+			$return.= "\n\n". $createRow[0]["Create Table"] .";\n\n";
+
+			for ($i = 0; $i < count($rowResults); $i++)  {
+				
+				$rowInsertDef = "INSERT INTO {$table} (";
+				$rowInsertVal = ") VALUES (";
+				$rowInsertEnd = ");";
+				
+				foreach($rowResults[$i] as $k => $v) {
+				
+					$rowInsertDef .= $k . ",";
+					$rowInsertVal .= "'" . $v . "',";
+					
+				}
+				
+				$rowInsertDef = substr($rowInsertDef,0,-1);
+				$rowInsertVal = substr($rowInsertVal,0,-1);
+				
+				$return .= $rowInsertDef . $rowInsertVal . $rowInsertEnd . "\r\n";
+
+			}
+			$return.="\n\n\n";
+			
+			return $return;
+			
+		}
 
 	}
 	
