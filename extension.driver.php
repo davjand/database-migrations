@@ -137,7 +137,7 @@
 			if(!($query == "")) {
 				$newFilePath = Database_Migrations_Utils::$SAVE_PATH . Database_Migrations_Utils::$FILE_PREFIX . Database_Migrations_Utils::getNextIndex() . ".sql";				
 				file_put_contents($newFilePath, $query . ";\r\n", FILE_APPEND);
-				$insertSql = "INSERT INTO tbl_database_migrations (version) VALUES ('" . md5($newFilePath) . "');";
+				$insertSql = "INSERT INTO tbl_database_migrations (`version`) VALUES ('" . md5($newFilePath) . "');";
 				Symphony::Database()->query($insertSql);
 				file_put_contents($newFilePath, $insertSql, FILE_APPEND);
 			}
