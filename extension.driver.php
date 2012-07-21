@@ -178,7 +178,7 @@
 					"sym_sections",
 					"sym_fields",
 					"sym_fields_input",
-					"sym_authors",
+					/*"sym_authors",*/
 					/*"sym_forgotpass",*/
 					"sym_pages",
 					"sym_pages_type",
