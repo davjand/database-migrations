@@ -94,7 +94,7 @@
 		
 			$rowResults = Symphony::Database()->fetch("SELECT * FROM ".$table);
 			$numFields = count($rowResults[0]);
-			$return.= 'DROP TABLE '.$table.';';
+			$return.= 'DROP TABLE IF EXISTS '.$table.';';
 			
 			$createRow = Symphony::Database()->fetch('SHOW CREATE TABLE '.$table);
 		
@@ -108,7 +108,7 @@
 				
 				foreach($rowResults[$i] as $k => $v) {
 				
-					$rowInsertDef .= $k . ",";
+					$rowInsertDef .= "`" . $k . "`,";
 					$rowInsertVal .= "'" . $v . "',";
 					
 				}
