@@ -60,32 +60,7 @@
 				return true;
 			}
 		
-		}		
-		
-		public static function createBaseline($ignoreTables = array()) {
-
-			$return = "";
-		
-			$tablesRaw = Symphony::Database()->fetch("SHOW TABLES");
-			$rawKey = array_keys($tablesRaw[0])[0];
-			
-			$tables = array();
-			foreach($tablesRaw as $raw) {
-				$tables[] = $raw[$rawKey];
-			}
-			
-			//print_r($tables);
-
-			//cycle through
-			foreach($tables as $table) {
-				if(!in_array($table, $ignoreTables)) {
-					$return .= getTableBackup($table);
-				}
-			}
-
-			file_put_contents(self::$SAVE_PATH . "/baseline.sql", $return);
-			
-		}	
+		}
 		
 		public static function getTableBackup($table) {
 		
@@ -122,7 +97,35 @@
 			
 			return $return;
 			
-		}
+		}		
+		
+		public static function createBaseline($ignoreTables = array()) {
+
+			$return = "";
+		
+			$tablesRaw = Symphony::Database()->fetch("SHOW TABLES");
+			
+			$rawTemp = array_keys($tablesRaw[0]);
+			$rawKey = $rawTemp[0];
+			
+			$tables = array();
+			foreach($tablesRaw as $raw) {
+				$tables[] = $raw[$rawKey];
+			}
+			
+			//print_r($tables);
+
+			//cycle through
+			foreach($tables as $table) {
+				if(!in_array($table, $ignoreTables)) {
+					$return .= getTableBackup($table);
+				}
+			}
+
+			file_put_contents(self::$SAVE_PATH . "/baseline.sql", $return);
+			
+		}	
+		
 
 	}
 	

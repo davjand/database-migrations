@@ -22,8 +22,12 @@
 		}
 	
 		public function install($location='database-migrations') {	
-		
-			mkdir(Database_Migrations_Utils::$SAVE_PATH);
+			
+			$savePath=Database_Migrations_Utils::$SAVE_PATH;
+			
+			if(!file_exists($savePath)){
+				mkdir($savePath);
+			}
 		
 			try{
 				Symphony::Database()->query("
