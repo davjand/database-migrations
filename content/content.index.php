@@ -28,10 +28,10 @@
 		
 				$fileList = Database_Migrations_Utils::getDatabaseUpdateList();
 				
-				Symphony::Database()->query(file_get_contents(Database_Migrations_Utils::$SAVE_PATH . "baseline.sql"));
+				Database_Migrations_Utils::runMultipleQueries(file_get_contents(Database_Migrations_Utils::$SAVE_PATH . "baseline.sql"));
 				
 				for($i=0;$i<count($fileList);$i++) {
-					Symphony::Database()->query(file_get_contents($fileList[$i]));
+					Database_Migrations_Utils::runMultipleQueries(file_get_contents(Database_Migrations_Utils::$SAVE_PATH . $fileList[$i]));
 				}				
 				
 				header("Location: " . SYMPHONY_URL . $_GET["redirect"]);

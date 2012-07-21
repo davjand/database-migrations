@@ -123,9 +123,23 @@
 			
 			return $return;
 			
-		}	
+		}
 		
-
+		/* runMultipleQueries
+		 *
+		 * A quick and dirty method of running multiple mysql queries. Won't work if the table data contains semicolons...
+		 *
+		*/
+		public static function runMultipleQueries($query){
+		
+			//I have no idea how this works but: http://stackoverflow.com/questions/689257/mysql-split-multiquery-string-with-php
+			$queryArray = preg_split('/[.+;][\s]*\n/', $query, -1, PREG_SPLIT_NO_EMPTY);
+			
+			foreach($queryArray as $singleQuery){
+				Symphony::Database()->query($singleQuery);
+			}	
+			return;
+		}
 	}
 	
 ?>
