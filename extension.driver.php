@@ -145,17 +145,32 @@
 		}
 		
 		private function isChangeQuery($query) {
-			return $this->strMultiFind($query, array(
-					"ALTER",
-					"CREATE",
-					"DROP",
-					"RENAME",
-					"TRUNCATE",
-					"DELETE",
-					"INSERT",
-					"REPLACE",
-					"UPDATE"			
-				));
+
+			$isChange = false;
+			
+			//correct type of query
+			if(
+				$this->strMultiFind($query, array(
+						"ALTER",
+						"CREATE",
+						"DROP",
+						"RENAME",
+						"TRUNCATE",
+						"DELETE",
+						"INSERT",
+						"REPLACE",
+						"UPDATE"			
+					))
+				){
+					$isChange=true;
+				}
+			
+			//Not a 'SHOW' query
+			if(substr($query, 0, strlen("SHOW")) === "SHOW"){
+				$isChange=false;
+			}
+			
+			return $isChange;
 		}
 		
 		private function isStructureChangeQuery($query) {
@@ -163,12 +178,12 @@
 					"sym_sections",
 					"sym_fields",
 					"sym_fields_input",
-					/*"sym_authors",*/
+					"sym_authors",
 					/*"sym_forgotpass",*/
 					"sym_pages",
 					"sym_pages_type",
-					/* "sym_extensions", */
-					/* "sym_extensions_delegates" */
+					"sym_extensions",
+					"sym_extensions_delegates"
 				));
 		}
 		
