@@ -60,10 +60,36 @@
 				return true;
 			}
 		
+		}		
+		
+		public static function createBaseline($ignoreTables = array()) {
+
+			$return = "";
+		
+			$tablesRaw = Symphony::Database()->fetch("SHOW TABLES");
+			
+			$rawTemp = array_keys($tablesRaw[0]);
+			$rawKey = $rawTemp[0];
+			
+			$tables = array();
+			foreach($tablesRaw as $raw) {
+				$tables[] = $raw[$rawKey];
+			}
+			
+
+			//cycle through
+			foreach($tables as $table) {
+				if(!in_array($table, $ignoreTables)) {
+					$return .= self::getTableBackup($table);
+				}
+			}
+
+			file_put_contents(self::$SAVE_PATH . "/baseline.sql", $return);
+			
 		}
 		
 		public static function getTableBackup($table) {
-		
+				
 			$return = "";
 		
 			$rowResults = Symphony::Database()->fetch("SELECT * FROM ".$table);
@@ -96,33 +122,6 @@
 			$return.="\n\n\n";
 			
 			return $return;
-			
-		}		
-		
-		public static function createBaseline($ignoreTables = array()) {
-
-			$return = "";
-		
-			$tablesRaw = Symphony::Database()->fetch("SHOW TABLES");
-			
-			$rawTemp = array_keys($tablesRaw[0]);
-			$rawKey = $rawTemp[0];
-			
-			$tables = array();
-			foreach($tablesRaw as $raw) {
-				$tables[] = $raw[$rawKey];
-			}
-			
-			//print_r($tables);
-
-			//cycle through
-			foreach($tables as $table) {
-				if(!in_array($table, $ignoreTables)) {
-					$return .= getTableBackup($table);
-				}
-			}
-
-			file_put_contents(self::$SAVE_PATH . "/baseline.sql", $return);
 			
 		}	
 		
