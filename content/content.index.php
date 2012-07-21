@@ -28,7 +28,7 @@
 		
 				$fileList = Database_Migrations_Utils::getDatabaseUpdateList();
 				
-				Symphony::Database()->query(file_get_contents(self::$SAVE_PATH . "baseline.sql"));
+				Symphony::Database()->query(file_get_contents(Database_Migrations_Utils::$SAVE_PATH . "baseline.sql"));
 				
 				for($i=0;$i<count($fileList);$i++) {
 					Symphony::Database()->query(file_get_contents($fileList[$i]));
