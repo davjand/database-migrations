@@ -109,7 +109,7 @@
 		}
 		
 		public function appendAlert($context) {
-			/* Doesn't work and is causing uninstall errors
+			
 			if(isset($_GET["db-update"])) {
 				if($_GET["db-update"] == "success") {
 					Administration::instance()->Page->pageAlert(
@@ -131,7 +131,7 @@
 						Alert::ERROR
 					);
 				}
-			}*/
+			}
 		}
 		
 		
