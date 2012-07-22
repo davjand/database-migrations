@@ -56,12 +56,10 @@
 		}
 		
 		public static function instanceIsOutOfDate() {
-		
-			$latestFileName = self::getSavePath() . self::$FILE_PREFIX . (self::getNextIndex() - 1) . ".sql";
+			
+			$latestFileName =  self::$FILE_PREFIX . (self::getNextIndex() - 1) . ".sql";
 			$latestVersion = md5($latestFileName);
-			
 			$latestInstalledVersion = Symphony::Database()->fetchVar("version", 0, "SELECT * FROM tbl_database_migrations ORDER BY id DESC LIMIT 1");
-			
 			if($latestInstalledVersion == "" || ($latestVersion == $latestInstalledVersion)) {
 				return false;
 			}

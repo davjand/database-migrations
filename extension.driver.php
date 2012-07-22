@@ -46,8 +46,7 @@
 			Database_Migrations_Utils::createBaseline();
 		
 			Symphony::Configuration()->set('track-structure-only', 'yes', $location);
-			Symphony::Configuration()->set('db-version', '0', $location);
-			Symphony::Configuration()->set('num-files', '0', $location);		
+			Symphony::Configuration()->set('enabled', '1', $location);		
 			Administration::instance()->saveConfig();
 			return true;
 		}
@@ -61,7 +60,8 @@
 			}
 			catch(Exception $e){
 				return false;
-			}		
+			}
+			Symphony::Configuration()->set('enabled', '0', $location);			
 		
 			Symphony::Configuration()->remove($location);
 			Administration::instance()->saveConfig();
@@ -110,38 +110,48 @@
 		
 		public function appendAlert($context) {
 			
-			if(isset($_GET["db-update"])) {
-				if($_GET["db-update"] == "success") {
-					Administration::instance()->Page->pageAlert(
-						__('Your database was updated.'),
-						Alert::SUCCESS
-					);
+			//check still installed and worth running
+			if(Symphony::Configuration()->get("enabled", "database-migrations") == "1" ){
+			
+				if(isset($_GET["db-update"])) {
+					if($_GET["db-update"] == "success") {
+						Administration::instance()->Page->pageAlert(
+							__('Your database was updated.'),
+							Alert::SUCCESS
+						);
+					}
+					else {
+						Administration::instance()->Page->pageAlert(
+							__('Database update failed.'),
+							Alert::ERROR
+						);				
+					}
 				}
-				else {
-					Administration::instance()->Page->pageAlert(
-						__('Database update failed.'),
-						Alert::ERROR
-					);				
-				}
-			}
-			else{
-				if(Database_Migrations_Utils::instanceIsOutOfDate()) {
-					Administration::instance()->Page->pageAlert(
-						__('Your database is out of date.') . ' <a href="' . SYMPHONY_URL . '/extension/database_migrations?action=do&redirect=' . getCurrentPage() . '">' . __('Update?') . '</a>',
-						Alert::ERROR
-					);
+				else{
+					if(Database_Migrations_Utils::instanceIsOutOfDate()) {
+						Administration::instance()->Page->pageAlert(
+							__('Your database is out of date.') . ' <a href="' . SYMPHONY_URL . '/extension/database_migrations?action=update&redirect=' . getCurrentPage() . '">' . __('Update?') . '</a>',
+							Alert::ERROR
+						);
+					}
 				}
 			}
 		}
 		
 		
 		private function saveQuery($query) {
-			if(!($query == "")) {
-				$newFilePath = Database_Migrations_Utils::getSavePath() . "/" .  Database_Migrations_Utils::$FILE_PREFIX . Database_Migrations_Utils::getNextIndex() . ".sql";				
-				file_put_contents($newFilePath, $query . ";\r\n", FILE_APPEND);
-				$insertSql = "INSERT INTO tbl_database_migrations (`version`) VALUES ('" . md5($newFilePath) . "');";
-				Symphony::Database()->query($insertSql);
-				file_put_contents($newFilePath, $insertSql, FILE_APPEND);
+			if(Symphony::Configuration()->get("enabled", "database-migrations") == "1" ){
+				if(!($query == "")) {
+				
+					//We can't MDF the entire path as this may change
+					$newFileName = Database_Migrations_Utils::$FILE_PREFIX . Database_Migrations_Utils::getNextIndex() . ".sql";
+					$newFilePath = Database_Migrations_Utils::getSavePath() . "/" . $newFileName; 
+									
+					file_put_contents($newFilePath, $query . ";\r\n", FILE_APPEND);
+					$insertSql = "INSERT INTO tbl_database_migrations (`version`) VALUES ('" . md5($newFileName) . "');";
+					Symphony::Database()->query($insertSql);
+					file_put_contents($newFilePath, $insertSql, FILE_APPEND);
+				}
 			}
 
 		}

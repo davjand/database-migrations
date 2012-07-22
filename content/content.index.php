@@ -44,7 +44,9 @@
 				for($i=0;$i<count($fileList);$i++) {
 					//if exists
 					
-					Database_Migrations_Utils::runMultipleQueries(file_get_contents(Database_Migrations_Utils::getSavePath() . "/". $fileList[$i]));
+					//Check has not been executrd
+					
+					//Database_Migrations_Utils::runMultipleQueries(file_get_contents(Database_Migrations_Utils::getSavePath() . "/". $fileList[$i]));
 				}				
 				
 				header("Location: " . SYMPHONY_URL . $_GET["redirect"]);
