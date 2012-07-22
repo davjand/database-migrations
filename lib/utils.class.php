@@ -136,7 +136,7 @@
 		
 		/* runMultipleQueries
 		 *
-		 * A quick and dirty method of running multiple mysql queries. Won't work if the table data contains semicolons...
+		 * A quick and dirty method of running multiple mysql queries
 		 *
 		*/
 		public static function runMultipleQueries($query){

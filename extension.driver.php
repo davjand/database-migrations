@@ -109,6 +109,7 @@
 		}
 		
 		public function appendAlert($context) {
+			/* Doesn't work and is causing uninstall errors
 			if(isset($_GET["db-update"])) {
 				if($_GET["db-update"] == "success") {
 					Administration::instance()->Page->pageAlert(
@@ -130,13 +131,13 @@
 						Alert::ERROR
 					);
 				}
-			}
+			}*/
 		}
 		
 		
 		private function saveQuery($query) {
 			if(!($query == "")) {
-				$newFilePath = Database_Migrations_Utils::getSavePath() . Database_Migrations_Utils::$FILE_PREFIX . Database_Migrations_Utils::getNextIndex() . ".sql";				
+				$newFilePath = Database_Migrations_Utils::getSavePath() . "/" .  Database_Migrations_Utils::$FILE_PREFIX . Database_Migrations_Utils::getNextIndex() . ".sql";				
 				file_put_contents($newFilePath, $query . ";\r\n", FILE_APPEND);
 				$insertSql = "INSERT INTO tbl_database_migrations (`version`) VALUES ('" . md5($newFilePath) . "');";
 				Symphony::Database()->query($insertSql);
