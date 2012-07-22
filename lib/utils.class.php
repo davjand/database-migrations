@@ -10,19 +10,23 @@
 		// a switch so that if we're doing operations ourselves (like in the testing functions), we can turn ourselves off.
 		public static $CAPTURE_ACTIVE = 1;
 		
-		public static $SAVE_PATH;
+		public static $SAVE_PATH = '/migrations';
 		public static $FILE_PREFIX = "db-";
 		
-				
-		function __construct(){
-			self::$SAVE_PATH = WORKSPACE . '/migrations/';
+		public static function getSavePath(){
+			$savePath = WORKSPACE . self::$SAVE_PATH;
+			
+			if(!file_exists($savePath)){
+				mkdir($savePath);
+			} 
+			return $savePath;
 		}
 
 		public static function getDatabaseUpdateList() {
 			
 			$list = array();
 
-			if ($handle = opendir(self::$SAVE_PATH)) {
+			if ($handle = opendir(self::getSavePath())) {
 				while (false !== ($entry = readdir($handle))) {
 					if ($entry != "." && $entry != "..") {
 						if(substr($entry, 0, 3) == self::$FILE_PREFIX) {
@@ -53,7 +57,7 @@
 		
 		public static function instanceIsOutOfDate() {
 		
-			$latestFileName = self::$SAVE_PATH . self::$FILE_PREFIX . (self::getNextIndex() - 1) . ".sql";
+			$latestFileName = self::getSavePath() . self::$FILE_PREFIX . (self::getNextIndex() - 1) . ".sql";
 			$latestVersion = md5($latestFileName);
 			
 			$latestInstalledVersion = Symphony::Database()->fetchVar("version", 0, "SELECT * FROM tbl_database_migrations ORDER BY id DESC LIMIT 1");
@@ -89,7 +93,7 @@
 				}
 			}
 
-			file_put_contents(self::$SAVE_PATH . "/baseline.sql", $return);
+			file_put_contents(self::getSavePath() . "/baseline.sql", $return);
 			
 		}
 		

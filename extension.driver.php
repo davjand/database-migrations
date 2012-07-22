@@ -23,7 +23,7 @@
 	
 		public function install($location='database-migrations') {	
 			
-			$savePath=Database_Migrations_Utils::$SAVE_PATH;
+			$savePath=Database_Migrations_Utils::getSavePath();
 			
 			if(!file_exists($savePath)){
 				mkdir($savePath);
@@ -102,7 +102,9 @@
 						}				
 					}
 				}
-				else {/* probably a select query */}
+				else {
+					//probably a select query
+				}
 			}
 		}
 		
@@ -133,9 +135,8 @@
 		
 		
 		private function saveQuery($query) {
-			
 			if(!($query == "")) {
-				$newFilePath = Database_Migrations_Utils::$SAVE_PATH . Database_Migrations_Utils::$FILE_PREFIX . Database_Migrations_Utils::getNextIndex() . ".sql";				
+				$newFilePath = Database_Migrations_Utils::getSavePath() . Database_Migrations_Utils::$FILE_PREFIX . Database_Migrations_Utils::getNextIndex() . ".sql";				
 				file_put_contents($newFilePath, $query . ";\r\n", FILE_APPEND);
 				$insertSql = "INSERT INTO tbl_database_migrations (`version`) VALUES ('" . md5($newFilePath) . "');";
 				Symphony::Database()->query($insertSql);
