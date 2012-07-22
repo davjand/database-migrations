@@ -10,8 +10,13 @@
 		// a switch so that if we're doing operations ourselves (like in the testing functions), we can turn ourselves off.
 		public static $CAPTURE_ACTIVE = 1;
 		
-		public static $SAVE_PATH = "./workspace/migrations/";
+		public static $SAVE_PATH;
 		public static $FILE_PREFIX = "db-";
+		
+				
+		function __construct(){
+			self::$SAVE_PATH = WORKSPACE . '/migrations/';
+		}
 
 		public static function getDatabaseUpdateList() {
 			
