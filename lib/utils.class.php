@@ -12,6 +12,8 @@
 		
 		public static $SAVE_PATH = '/migrations';
 		public static $FILE_PREFIX = "db-";
+		public static $LOCAL_LOG = "queries-run-locally.csv";
+		public static $BASELINE = "baseline.sql";
 		
 		public static function getSavePath(){
 			$savePath = WORKSPACE . self::$SAVE_PATH;
@@ -21,52 +23,115 @@
 			} 
 			return $savePath;
 		}
+		
+		public static function getLocalLogPath(){
+			$logPath = WORKSPACE . self::$SAVE_PATH . "/" . self::$LOCAL_LOG;
+			if(!file_exists($logPath)){
+				touch($logPath);
+			}
+			return $logPath;
+		}
 
-		public static function getDatabaseUpdateList() {
+		
+		public function getCompleteUpdateFileList(){
 			
-			$list = array();
+			$saveDir = self::getSavePath();
+			if (glob($saveDir . "/*.sql") == false) return 0;
+			
+			$fileList = glob($saveDir . "/*.sql");
+			
+			//remove baseline
+			$fileList = array_filter($fileList, function($item){
+				if(strpos($item,Database_Migrations_Utils::$BASELINE) === false){
+					return true;
+				}
+				else{
+					return false;
+				}
+			});
+			
+			return $fileList;
+		}
 
-			if ($handle = opendir(self::getSavePath())) {
-				while (false !== ($entry = readdir($handle))) {
-					if ($entry != "." && $entry != "..") {
-						if(substr($entry, 0, 3) == self::$FILE_PREFIX) {
-							$list[] = $entry;
-						}
+
+		public static function getPendingUpdateFileList() {
+			
+			$updateFiles = array();
+			
+			//load the log file
+			$logDir = self::getLocalLogPath();
+			$logContents = file_get_contents($logDir);
+			$logList = explode("\n",$logContents);
+			
+			if(count($logList) < 1) return $updateFiles;
+			
+			$list = self::getCompleteUpdateFileList();
+			
+			if(count($list) < 2) return $updateFiles;
+			
+			//search through looking for the relevent ones
+			for($i=0; $i < count($list); $i++){
+			
+				$foundFlag=false;
+				for($k=0; $k < count($logList) -1; $k++){
+				
+					if(self::getFileNameFromPath($list[$i]) == $logList[$k]){
+						$foundFlag=true;
+						break;
 					}
 				}
-				closedir($handle);
-            }		
-		
-			return $list;
-		
-		}
-		
-		public static function getNextIndex() {
-			$id = 0;
-
-			$fileList = self::getDatabaseUpdateList();
-			for($i=0;$i<count($fileList);$i++) {
-				$num = str_replace(array(self::$FILE_PREFIX,".sql"), "", $fileList[$i]);
-				if($num > $id && is_numeric($num)) {
-					$id = $num;
-				}		
+				
+				if(!$foundFlag){
+					echo $list[$i];
+					$updateFiles = array_push($updateFiles,$list[$i]);
+				}
+				
 			}
-			
-            return $id+1;
+			print_r($updateList);
+			return $updateList;
+		
 		}
+		
+		public static function getNewFileName($increment=0){
+			$time = explode(".",microtime(true));
+			
+			//check that it doesn't exist
+			$fileId = date("Y-m-d-His")."-".$time[1];
+			
+			//add some trailing sequential numbers ifneeded
+			$fileName = $FILE_PREFIX . $fileId ."-" . sprintf("%03s", $increment) . ".sql";			
+			
+			if(file_exists(self::getSavePath()."/".$fileName)){
+				return self::getNewFileName($increment+1);
+			}
+			else{
+				return $fileName;
+			}
+		}
+		
+		public static function getFileNameFromPath($path){
+			return str_replace(self::getSavePath()."/","",$path);
+		}
+		
 		
 		public static function instanceIsOutOfDate() {
 			
-			$latestFileName =  self::$FILE_PREFIX . (self::getNextIndex() - 1) . ".sql";
-			$latestVersion = md5($latestFileName);
-			$latestInstalledVersion = Symphony::Database()->fetchVar("version", 0, "SELECT * FROM tbl_database_migrations ORDER BY id DESC LIMIT 1");
-			if($latestInstalledVersion == "" || ($latestVersion == $latestInstalledVersion)) {
-				return false;
-			}
-			else {
+			//count the logged queries and the number of queries, if different then not up to date
+			$saveDir = self::getSavePath();
+			if (glob($saveDir . "/*.sql") == false) return false;
+			
+			$sqlCount = count(glob($saveDir . "/*.sql")) - 1;
+			
+			$logDir = self::getLocalLogPath();
+			$logContents = file_get_contents($logDir);
+			$logCount = count(explode("\n",$logContents)) -1;
+			
+			if($logCount < $sqlCount){
 				return true;
 			}
-		
+			else {
+				return false;
+			}
 		}		
 		
 		public static function createBaseline($ignoreTables = array()) {
@@ -91,7 +156,7 @@
 				}
 			}
 
-			file_put_contents(self::getSavePath() . "/baseline.sql", $return);
+			file_put_contents(self::getSavePath() . "/". self::$BASELINE, $return);
 			
 		}
 		
@@ -130,6 +195,10 @@
 			
 			return $return;
 			
+		}
+		
+		public static function appendLogItem($item){
+			file_put_contents(Database_Migrations_Utils::getLocalLogPath(), $item."\n", FILE_APPEND);
 		}
 		
 		/* runMultipleQueries

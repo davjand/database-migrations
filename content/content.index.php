@@ -24,31 +24,31 @@
 		
 		private function __indexPage() {
 			
-			if($_GET["action"] == "reinstall") {
+			if($_GET["action"] == "cleaninstall") {
 		
-				$fileList = Database_Migrations_Utils::getDatabaseUpdateList();
+				/*$fileList = Database_Migrations_Utils::getDatabaseUpdateList();
 				
 				Database_Migrations_Utils::runMultipleQueries(file_get_contents(Database_Migrations_Utils::getSavePath() . "/baseline.sql"));
 				for($i=0;$i<count($fileList);$i++) {
 
 					Database_Migrations_Utils::runMultipleQueries(file_get_contents(Database_Migrations_Utils::getSavePath() . "/". $fileList[$i]));
 				}				
-				
+				*/
 				header("Location: " . SYMPHONY_URL . $_GET["redirect"]);
 			
 			}
 			elseif($_GET["action"] == "update") {
 					
-				$fileList = Database_Migrations_Utils::getDatabaseUpdateList();
+				$fileList = Database_Migrations_Utils::getPendingUpdateFileList();
 				
 				for($i=0;$i<count($fileList);$i++) {
-					//if exists
 					
-					//Check has not been executrd
+					//run query
+					Database_Migrations_Utils::runMultipleQueries(file_get_contents($fileList[$i]));
 					
-					//Database_Migrations_Utils::runMultipleQueries(file_get_contents(Database_Migrations_Utils::getSavePath() . "/". $fileList[$i]));
+					//add to log
+					Database_Migrations_Utils::appendLogItem(Database_Migrations_Utils::getFileNameFromPath($list[$i]));
 				}				
-				
 				header("Location: " . SYMPHONY_URL . $_GET["redirect"]);
 			
 			}

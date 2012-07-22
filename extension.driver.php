@@ -27,21 +27,7 @@
 			
 			if(!file_exists($savePath)){
 				mkdir($savePath);
-			}
-		
-			try{
-				Symphony::Database()->query("
-					CREATE TABLE IF NOT EXISTS `tbl_database_migrations` (
-						`id` int(11) unsigned NOT NULL auto_increment,
-						`version` VARCHAR(128) NULL,
-						PRIMARY KEY  (`id`)
-					) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-				");
-			}
-			catch(Exception $e){
-				echo($e->getMessage());
-				return false;
-			}		
+			}	
 		
 			Database_Migrations_Utils::createBaseline();
 		
@@ -53,14 +39,6 @@
 		
 		public function uninstall($location='database-migrations') {
 		
-			try{
-				Symphony::Database()->query("
-					DROP TABLE `tbl_database_migrations`
-				");
-			}
-			catch(Exception $e){
-				return false;
-			}
 			Symphony::Configuration()->set('enabled', '0', $location);			
 		
 			Symphony::Configuration()->remove($location);
@@ -96,39 +74,29 @@
 				
 				/* FILTERS */
 				//Shamelessly stolen from: https://github.com/remie/CDI/blob/master/lib/class.cdilogquery.php
-				// do not register changes to tbl_cdi_log
+
+				
+				// do not register changes to tbl_database_migrations
 				if (preg_match("/{$tbl_prefix}database_migrations/i", $query)) return true;
 				// only structural changes, no SELECT statements
 				if (!preg_match('/^(insert|update|delete|create|drop|alter|rename)/i', $query)) return true;
 				// un-tracked tables (sessions, cache, authors)
 				if (preg_match("/{$tbl_prefix}(authors|cache|forgotpass|sessions|tracker_activity)/i", $query)) return true;
 				// content updates in tbl_entries (includes tbl_entries_fields_*)
-				if (preg_match('/^(insert|delete|update)/i', $query) && preg_match("/({$config->tbl_prefix}entries)/i", $query)) return true;
+				if (preg_match('/^(insert|delete|update)/i', $query) && preg_match("/({$tbl_prefix}entries)/i", $query)) return true;
 				// append query delimeter if it doesn't exist
 				if (!preg_match('/;$/', $query)) $query .= ";";
 	
 				// Replace the table prefix in the query
 				// This allows query execution on slave instances with different table prefix.
-				$query = str_replace($tbl_prefix,'tbl_',$query);
+				// $query = str_replace($tbl_prefix,'tbl_',$query);
 				
-				$this->saveQuery($query);			
+				$this->saveQuery($query);
+							
 				return true;
-				/*
-				if($this->isChangeQuery($query)) {
-					if($this->isStructureChangeQuery($query)) {
-						$this->saveQuery($query);
-					}
-					else {
-						if(Symphony::Configuration()->get("track-structure-only", "database-migrations") == "no") {
-							$this->saveQuery($query);
-						}				
-					}
-				}
-				else {
-					//probably a select query
-				}*/
 			}
 		}
+		
 		
 		public function appendAlert($context) {
 			
@@ -164,15 +132,15 @@
 		private function saveQuery($query) {
 			if(Symphony::Configuration()->get("enabled", "database-migrations") == "1" ){
 				if(!($query == "")) {
-				
-					//We can't MD5 the entire path as this may change
-					$newFileName = Database_Migrations_Utils::$FILE_PREFIX . Database_Migrations_Utils::getNextIndex() . ".sql";
-					$newFilePath = Database_Migrations_Utils::getSavePath() . "/" . $newFileName; 
-									
-					file_put_contents($newFilePath, $query . ";\r\n", FILE_APPEND);
-					$insertSql = "INSERT INTO tbl_database_migrations (`version`) VALUES ('" . md5($newFileName) . "');";
-					Symphony::Database()->query($insertSql);
-					file_put_contents($newFilePath, $insertSql, FILE_APPEND);
+					
+					$newFileName = Database_Migrations_Utils::getNewFileName();
+					$newFilePath = Database_Migrations_Utils::getSavePath() . "/" . $newFileName ; 
+					
+					//log the entire thing to file
+					file_put_contents($newFilePath, $query, FILE_APPEND);
+					
+					//add to the item to the log
+					Database_Migrations_Utils::appendLogItem($newFileName);
 				}
 			}
 
