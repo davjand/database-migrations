@@ -90,8 +90,30 @@
 		
 		public function processQuery($context) {
 			if(Database_Migrations_Utils::$CAPTURE_ACTIVE) {
-				$query = $context["query"];
+				$query = trim($context["query"]);
 				
+				$tbl_prefix = Symphony::Configuration()->get('tbl_prefix', 'database');
+				
+				/* FILTERS */
+				//Shamelessly stolen from: https://github.com/remie/CDI/blob/master/lib/class.cdilogquery.php
+				// do not register changes to tbl_cdi_log
+				if (preg_match("/{$tbl_prefix}database_migrations/i", $query)) return true;
+				// only structural changes, no SELECT statements
+				if (!preg_match('/^(insert|update|delete|create|drop|alter|rename)/i', $query)) return true;
+				// un-tracked tables (sessions, cache, authors)
+				if (preg_match("/{$tbl_prefix}(authors|cache|forgotpass|sessions|tracker_activity)/i", $query)) return true;
+				// content updates in tbl_entries (includes tbl_entries_fields_*)
+				if (preg_match('/^(insert|delete|update)/i', $query) && preg_match("/({$config->tbl_prefix}entries)/i", $query)) return true;
+				// append query delimeter if it doesn't exist
+				if (!preg_match('/;$/', $query)) $query .= ";";
+	
+				// Replace the table prefix in the query
+				// This allows query execution on slave instances with different table prefix.
+				$query = str_replace($tbl_prefix,'tbl_',$query);
+				
+				$this->saveQuery($query);			
+				return true;
+				/*
 				if($this->isChangeQuery($query)) {
 					if($this->isStructureChangeQuery($query)) {
 						$this->saveQuery($query);
@@ -104,7 +126,7 @@
 				}
 				else {
 					//probably a select query
-				}
+				}*/
 			}
 		}
 		
@@ -143,7 +165,7 @@
 			if(Symphony::Configuration()->get("enabled", "database-migrations") == "1" ){
 				if(!($query == "")) {
 				
-					//We can't MDF the entire path as this may change
+					//We can't MD5 the entire path as this may change
 					$newFileName = Database_Migrations_Utils::$FILE_PREFIX . Database_Migrations_Utils::getNextIndex() . ".sql";
 					$newFilePath = Database_Migrations_Utils::getSavePath() . "/" . $newFileName; 
 									
