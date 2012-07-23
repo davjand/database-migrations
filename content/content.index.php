@@ -24,19 +24,24 @@
 		
 		private function __indexPage() {
 			
+			//completely refresh the database with a clean install
 			if($_GET["action"] == "cleaninstall") {
-		
-				/*$fileList = Database_Migrations_Utils::getDatabaseUpdateList();
 				
-				Database_Migrations_Utils::runMultipleQueries(file_get_contents(Database_Migrations_Utils::getSavePath() . "/baseline.sql"));
+				//Run the baseline
+				Database_Migrations_Utils::runMultipleQueries(file_get_contents(Database_Migrations_Utils::getSavePath() . "/". Database_Migrations_Utils::$BASELINE));
+				
+				//Run all the queries
+				$fileList = Database_Migrations_Utils::getCompleteUpdateFileList();
+				
 				for($i=0;$i<count($fileList);$i++) {
-
-					Database_Migrations_Utils::runMultipleQueries(file_get_contents(Database_Migrations_Utils::getSavePath() . "/". $fileList[$i]));
+					Database_Migrations_Utils::runMultipleQueries(file_get_contents($fileList[$i]));
 				}				
-				*/
+				
 				header("Location: " . SYMPHONY_URL . $_GET["redirect"]);
 			
 			}
+			
+			//perform a diff
 			elseif($_GET["action"] == "update") {
 					
 				$fileList = Database_Migrations_Utils::getPendingUpdateFileList();
