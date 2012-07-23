@@ -62,7 +62,7 @@
 			
 			elseif($_GET["action"] == "baseline") {
 				//Database_Migrations_Utils::createBaseline(array("sym_authors", "sym_cache", "sym_database_migrations", "sym_extensions", "sym_extensions_delegates", "sym_sessions"));
-				Database_Migrations_Utils::createBaseline(array("sym_cache", "sym_database_migrations", "sym_sessions"));
+				Database_Migrations_Utils::createBaseline();
 			}
 			elseif($_GET["action"] == "test") {
 				Database_Migrations_Fixtures::truncateSection("TestNewSection");
