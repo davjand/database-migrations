@@ -82,13 +82,11 @@
 				}
 				
 				if(!$foundFlag){
-					echo $list[$i];
-					$updateFiles = array_push($updateFiles,$list[$i]);
+					$updateFiles[] = $list[$i];
 				}
 				
 			}
-			print_r($updateList);
-			return $updateList;
+			return $updateFiles;
 		
 		}
 		

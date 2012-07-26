@@ -43,7 +43,8 @@
 			
 			//perform a diff
 			elseif($_GET["action"] == "update") {
-					
+				
+				$fileList = array();	
 				$fileList = Database_Migrations_Utils::getPendingUpdateFileList();
 				
 				for($i=0;$i<count($fileList);$i++) {
