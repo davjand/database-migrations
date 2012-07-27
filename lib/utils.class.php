@@ -40,6 +40,9 @@
 			
 			$fileList = glob($saveDir . "/*.sql");
 			
+			//ensure alphabetical order)
+			$fileList = sort($fileList);
+			
 			//remove baseline
 			$fileList = array_filter($fileList, function($item){
 				if(strpos($item,Database_Migrations_Utils::$BASELINE) === false){
@@ -86,6 +89,11 @@
 				}
 				
 			}
+			
+			if(count($updateFiles)>0){
+				$updateFiles = sort($updateFiles);
+			}
+			
 			return $updateFiles;
 		
 		}
@@ -204,15 +212,65 @@
 		 * A quick and dirty method of running multiple mysql queries
 		 *
 		*/
-		public static function runMultipleQueries($query){
+		public static function runMultipleQueries($query,$disableLogging=false){
 		
 			//I have no idea how this works but: http://stackoverflow.com/questions/689257/mysql-split-multiquery-string-with-php
 			$queryArray = preg_split('/[.+;][\s]*\n/', $query, -1, PREG_SPLIT_NO_EMPTY);
 			
+			$currentState= self::$CAPTURE_ACTIVE;
+			
+			//prevent logging
+			self::$CAPTURE_ACTIVE = !$disableLogging;
 			foreach($queryArray as $singleQuery){
 				Symphony::Database()->query($singleQuery);
-			}	
+			}
+			self::$CAPTURE_ACTIVE = $currentState;
+				
 			return;
+		}
+		
+		public static function saveQuery($query) {
+			
+			if(self::$CAPTURE_ACTIVE) {
+				
+				$tbl_prefix = Symphony::Configuration()->get('tbl_prefix', 'database');
+				
+				/* FILTERS */
+				//Shamelessly stolen from: https://github.com/remie/CDI/blob/master/lib/class.cdilogquery.php
+
+				// do not register changes to tbl_database_migrations
+				if (preg_match("/{$tbl_prefix}database_migrations/i", $query)) return true;
+				// only structural changes, no SELECT statements
+				if (!preg_match('/^(insert|update|delete|create|drop|alter|rename)/i', $query)) return true;
+				// un-tracked tables (sessions, cache, authors)
+				if (preg_match("/{$tbl_prefix}(authors|cache|forgotpass|sessions|tracker_activity)/i", $query)) return true;
+				// content updates in tbl_entries (includes tbl_entries_fields_*)
+				if (preg_match('/^(insert|delete|update)/i', $query) && preg_match("/({$tbl_prefix}entries)/i", $query)) return true;
+				// append query delimeter if it doesn't exist
+				if (!preg_match('/;$/', $query)) $query .= ";";
+	
+				// Replace the table prefix in the query
+				// This allows query execution on slave instances with different table prefix.
+				// $query = str_replace($tbl_prefix,'tbl_',$query);
+				
+				if(Symphony::Configuration()->get("enabled", "database-migrations") == "1" && !($query == "") ){
+						
+					$newFileName = self::getNewFileName();
+					$newFilePath = self::getSavePath() . "/" . $newFileName ; 
+					
+					//log the entire thing to file
+					file_put_contents($newFilePath, $query, FILE_APPEND);
+					
+					//add to the item to the log
+					Database_Migrations_Utils::appendLogItem($newFileName);
+				}			
+			}
+			return true;
+		}
+		
+		private function strMultiFind($headline, $fields) {
+			$regexp = '/(' . implode('|',array_values($fields)) . ')/i';
+			return (bool) preg_match($regexp, $headline);
 		}
 	}
 	

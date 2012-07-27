@@ -50,7 +50,7 @@
 				for($i=0;$i<count($fileList);$i++) {
 					
 					//run query
-					Database_Migrations_Utils::runMultipleQueries(file_get_contents($fileList[$i]));
+					Database_Migrations_Utils::runMultipleQueries(file_get_contents($fileList[$i]),true);
 					
 					//add to log
 					Database_Migrations_Utils::appendLogItem(Database_Migrations_Utils::getFileNameFromPath($list[$i]));
