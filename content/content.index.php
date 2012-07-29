@@ -48,12 +48,9 @@
 				$fileList = Database_Migrations_Utils::getPendingUpdateFileList();
 				
 				for($i=0;$i<count($fileList);$i++) {
-					
-					//run query
+					//run query & log
 					Database_Migrations_Utils::runMultipleQueries(file_get_contents($fileList[$i]),true);
-					
-					//add to log
-					Database_Migrations_Utils::appendLogItem(Database_Migrations_Utils::getFileNameFromPath($list[$i]));
+					Database_Migrations_Utils::appendLogItem(Database_Migrations_Utils::getFileNameFromPath($fileList[$i]));
 				}				
 				header("Location: " . SYMPHONY_URL . $_GET["redirect"]);
 			
@@ -62,7 +59,7 @@
 			
 			
 			elseif($_GET["action"] == "baseline") {
-				//Database_Migrations_Utils::createBaseline(array("sym_authors", "sym_cache", "sym_database_migrations", "sym_extensions", "sym_extensions_delegates", "sym_sessions"));
+				//Database_Migrations_Utils::createBaseline(array("sym_authors", "sym_cache", "sym_sessions"));
 				Database_Migrations_Utils::createBaseline();
 			}
 			elseif($_GET["action"] == "test") {
