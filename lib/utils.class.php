@@ -35,13 +35,17 @@
 		
 		public function getCompleteUpdateFileList(){
 			
+			$fileList=array();
+			
 			$saveDir = self::getSavePath();
-			if (glob($saveDir . "/*.sql") == false) return 0;
+			if (glob($saveDir . "/*.sql") == false) return $fileList;
 			
 			$fileList = glob($saveDir . "/*.sql");
 			
+			if(count($fileList)<1)return $fileList;
+			
 			//ensure alphabetical order)
-			$fileList = sort($fileList);
+			sort($fileList);
 			
 			//remove baseline
 			$fileList = array_filter($fileList, function($item){
@@ -91,7 +95,7 @@
 			}
 			
 			if(count($updateFiles)>0){
-				$updateFiles = sort($updateFiles);
+				sort($updateFiles);
 			}
 			
 			return $updateFiles;
