@@ -14,6 +14,8 @@ To work, the migration data is stored into the workspace folder which should be 
 
 It needs custom git ignore settings to work correctly (to keep the local tracking out of git).
 
-Please see davjand/sym-workspace for the build environment
+Please see davjand/ci-workspace for the build environment
 
 Why not track changes in the symphony mysql database you say? Executing queries to save symphonies queries is current a big no-no due to this invalidating the mysql last entry functionality
+
+NOTE: Needs php 5.3 or greater
