@@ -47,10 +47,16 @@
 				$fileList = array();	
 				$fileList = Database_Migrations_Utils::getPendingUpdateFileList();
 				
-				for($i=0;$i<count($fileList);$i++) {
-					//run query & log
-					Database_Migrations_Utils::runMultipleQueries(file_get_contents($fileList[$i]),true);
-					Database_Migrations_Utils::appendLogItem(Database_Migrations_Utils::getFileNameFromPath($fileList[$i]));
+				
+				if(count($fileList) > 0){
+					//Backup
+					Database_Migrations_Utils::generateBackup();
+				
+					for($i=0;$i<count($fileList);$i++) {
+						//run query & log
+						Database_Migrations_Utils::runMultipleQueries(file_get_contents($fileList[$i]),true);
+						Database_Migrations_Utils::appendLogItem(Database_Migrations_Utils::getFileNameFromPath($fileList[$i]));
+					}
 				}				
 				header("Location: " . SYMPHONY_URL . $_GET["redirect"]);
 			

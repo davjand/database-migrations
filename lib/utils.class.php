@@ -11,12 +11,22 @@
 		public static $CAPTURE_ACTIVE = 1;
 		
 		public static $SAVE_PATH = '/../data';
+		public static $BACKUP_PATH = '/../data-backups';
 		public static $FILE_PREFIX = "db-";
 		public static $LOCAL_LOG = "queries-run-locally.csv";
 		public static $BASELINE = "baseline.sql";
 		
 		public static function getSavePath(){
 			$savePath = DOCROOT . self::$SAVE_PATH;
+			
+			if(!file_exists($savePath)){
+				mkdir($savePath);
+			} 
+			return $savePath;
+		}
+		
+		public static function getBackupPath(){
+			$savePath = DOCROOT . self::$BACKUP_PATH;
 			
 			if(!file_exists($savePath)){
 				mkdir($savePath);
@@ -102,7 +112,7 @@
 		
 		}
 		
-		public static function getNewFileName($increment=0){
+		public static function getNewFileName($path,$increment=0){
 			$time = explode(".",microtime(true));
 			
 			//check that it doesn't exist
@@ -111,8 +121,8 @@
 			//add some trailing sequential numbers ifneeded
 			$fileName = $FILE_PREFIX . $fileId ."-" . sprintf("%03s", $increment) . ".sql";			
 			
-			if(file_exists(self::getSavePath()."/".$fileName)){
-				return self::getNewFileName($increment+1);
+			if(file_exists($path."/".$fileName)){
+				return self::getNewFileName($path,$increment+1);
 			}
 			else{
 				return $fileName;
@@ -144,8 +154,20 @@
 			}
 		}		
 		
+		public static function generateBackup($ignoreTables = array()){
+			$data = self::getBaselineSQL($ignoreTables);
+			
+			$newFileName = self::getNewFileName(self::getBackupPath());
+			
+			file_put_contents(self::getBackupPath() . "/". $newFileName, self::getBaselineSQL($ignoreTables));
+		}
+		
 		public static function createBaseline($ignoreTables = array()) {
-
+			file_put_contents(self::getSavePath() . "/". self::$BASELINE, self::getBaselineSQL($ignoreTables));
+		}
+		
+		
+		public static function getBaselineSQL($ignoreTables = array()){
 			$return = "";
 		
 			$tablesRaw = Symphony::Database()->fetch("SHOW TABLES");
@@ -165,9 +187,7 @@
 					$return .= self::getTableBackup($table);
 				}
 			}
-
-			file_put_contents(self::getSavePath() . "/". self::$BASELINE, $return);
-			
+			return $return;
 		}
 		
 		public static function getTableBackup($table) {
@@ -259,14 +279,14 @@
 				
 				if(Symphony::Configuration()->get("enabled", "database-migrations") == "1" && !($query == "") ){
 						
-					$newFileName = self::getNewFileName();
+					$newFileName = self::getNewFileName(self::getSavePath());
 					$newFilePath = self::getSavePath() . "/" . $newFileName ; 
 					
 					//log the entire thing to file
 					file_put_contents($newFilePath, $query, FILE_APPEND);
 					
 					//add to the item to the log
-					Database_Migrations_Utils::appendLogItem($newFileName);
+					self::appendLogItem($newFileName);
 				}			
 			}
 			return true;
