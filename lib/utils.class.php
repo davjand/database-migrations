@@ -10,13 +10,13 @@
 		// a switch so that if we're doing operations ourselves (like in the testing functions), we can turn ourselves off.
 		public static $CAPTURE_ACTIVE = 1;
 		
-		public static $SAVE_PATH = '/migrations';
+		public static $SAVE_PATH = '/../data';
 		public static $FILE_PREFIX = "db-";
 		public static $LOCAL_LOG = "queries-run-locally.csv";
 		public static $BASELINE = "baseline.sql";
 		
 		public static function getSavePath(){
-			$savePath = WORKSPACE . self::$SAVE_PATH;
+			$savePath = DOCROOT . self::$SAVE_PATH;
 			
 			if(!file_exists($savePath)){
 				mkdir($savePath);
@@ -25,7 +25,7 @@
 		}
 		
 		public static function getLocalLogPath(){
-			$logPath = WORKSPACE . self::$SAVE_PATH . "/" . self::$LOCAL_LOG;
+			$logPath = DOCROOT . self::$SAVE_PATH . "/" . self::$LOCAL_LOG;
 			if(!file_exists($logPath)){
 				touch($logPath);
 			}
