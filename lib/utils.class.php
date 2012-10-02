@@ -112,11 +112,9 @@
 		
 		}
 		
-		public static function getNewFileName($path,$increment=0){
-			$time = explode(".",microtime(true));
-			
+		public static function getNewFileName($path,$increment=0){			
 			//check that it doesn't exist
-			$fileId = date("Y-m-d-His")."-".$time[1];
+			$fileId = date("Y-m-d-His");
 			
 			//add some trailing sequential numbers ifneeded
 			$fileName = $FILE_PREFIX . $fileId ."-" . sprintf("%03s", $increment) . ".sql";			
