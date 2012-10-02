@@ -117,7 +117,7 @@
 			$fileId = date("Y-m-d-His");
 			
 			//add some trailing sequential numbers ifneeded
-			$fileName = $FILE_PREFIX . $fileId ."-" . sprintf("%03s", $increment) . ".sql";			
+			$fileName = $FILE_PREFIX . $fileId ."-" . sprintf("%05s", $increment) . ".sql";			
 			
 			if(file_exists($path."/".$fileName)){
 				return self::getNewFileName($path,$increment+1);
