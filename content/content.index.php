@@ -50,7 +50,7 @@
 				
 				if(count($fileList) > 0){
 					//Backup
-					Database_Migrations_Utils::generateBackup();
+					//Database_Migrations_Utils::generateBackup();
 				
 					for($i=0;$i<count($fileList);$i++) {
 						//run query & log
