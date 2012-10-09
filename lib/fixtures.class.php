@@ -1,5 +1,5 @@
 <?php
-
+/*
 	require_once(EXTENSIONS . "/database_migrations/lib/utils.class.php");
 	require_once(EXTENSIONS . '/symql/lib/class.symql.php');
 	
@@ -96,5 +96,5 @@
 		}
 	
 	}
-
+*/
 ?>

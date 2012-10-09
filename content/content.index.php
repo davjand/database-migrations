@@ -9,7 +9,7 @@
 		{
 			parent::build();
 			$this->setPageType('form');
-			$this->setTitle('');
+			$this->setTitle('Symphony - Database Migrations');
 			
 		}
 
@@ -72,7 +72,10 @@
 				Database_Migrations_Fixtures::truncateSection("TestNewSection");
 			}
 			else {
+				$xmlRoot = new XMLElement('root');
+			
 				$xslt = new XSLTPage();
+				$xslt->setXML($xmlRoot->generate());
 				$xslt->setXSL(EXTENSIONS . '/database_migrations/content/index.xsl', true);
 				$this->Form->setValue($xslt->generate());				
 				

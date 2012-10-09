@@ -63,6 +63,11 @@
 					'delegate' => 'PostQueryExecution',
 					'callback' => 'processQuery'
 				),
+				array(
+					'page'		=> '/backend/',
+					'delegate'	=> 'ExtensionsAddToNavigation',
+					'callback'	=> 'add_navigation'
+				)
 			);
 		}
 		
@@ -101,7 +106,13 @@
 			}
 		}
 		
-		
+		public function add_navigation($context) {
+			$context['navigation'][200]['children'][] = array(
+				'link'		=> '/extension/database_migrations/',
+				'name'		=> __('Database Migrations'),
+				'visible'	=> 'yes'
+			);
+		}		
 		
 		
 
