@@ -79,6 +79,13 @@
 		
 		public function appendAlert($context) {
 			
+			if(Symphony::Configuration()->get("allow-blueprints-access", "database-migrations") == "0") {
+				Administration::instance()->Page->pageAlert(
+					__('Database Migrations is in \'live\' mode and has prevented access to Symphony Blueprints.'),
+					Alert::ERROR
+				);				
+			}			
+			
 			//check still installed and worth running
 			if(Symphony::Configuration()->get("enabled", "database-migrations") == "1" ){
 			
