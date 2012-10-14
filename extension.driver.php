@@ -11,7 +11,7 @@
 		public function about() {
 			return array(
 				'name' => 'Database Migrations',
-				'version' => '1.0',
+				'version' => '1.0.2',
 				'release-date' => '2011-05-07',
 				'author' => array(
 					'name' => 'Tom Johnson',
@@ -32,7 +32,8 @@
 			Database_Migrations_Utils::createBaseline();
 		
 			Symphony::Configuration()->set('track-structure-only', 'yes', $location);
-			Symphony::Configuration()->set('enabled', '1', $location);		
+			Symphony::Configuration()->set('enabled', '1', $location);
+			Symphony::Configuration()->set('allow-blueprints-access','1', $location);
 			Administration::instance()->saveConfig();
 			return true;
 		}
@@ -66,7 +67,7 @@
 				array(
 					'page'		=> '/backend/',
 					'delegate'	=> 'ExtensionsAddToNavigation',
-					'callback'	=> 'add_navigation'
+					'callback'	=> 'mod_navigation'
 				)
 			);
 		}
@@ -106,12 +107,19 @@
 			}
 		}
 		
-		public function add_navigation($context) {
+		public function mod_navigation($context) {
+			
+			
 			$context['navigation'][200]['children'][] = array(
 				'link'		=> '/extension/database_migrations/',
 				'name'		=> __('Database Migrations'),
 				'visible'	=> 'yes'
 			);
+			
+			if(Symphony::Configuration()->get("allow-blueprints-access", "database-migrations") == "0") {
+				$context['navigation'][200] = array();
+			}
+
 		}		
 		
 		
